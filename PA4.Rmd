@@ -7,6 +7,7 @@ use the necessary library and read the data
 
 knitr::opts_chunk$set(echo = TRUE) 
 library(readr)
+library(knitr)
 activity <- read_csv("C:/Users/IAS User/Desktop/activity.csv")
 # see the summary of the data
 summary(activity)
