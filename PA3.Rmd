@@ -1,0 +1,110 @@
+itle: "Reproducible Research"
+output: html_document
+---
+### Loading and processing the data
+use the necessary library and read the data
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE) 
+library(readr)
+activity <- read_csv("C:/Users/IAS User/Desktop/activity.csv")
+# see the summary of the data
+summary(activity)
+```
+
+```{r}
+# Remove the NA values 
+good_act <- activity[complete.cases(activity), ]
+
+```
+### Histogram of the total number of steps taken each day
+For this part, first I will calculate the total number of steps taken each day and then create a histogram
+```{r}
+# calculate the total number of steps taken each day
+steps_per_day <- aggregate(steps ~ date, good_act,sum)
+# create the histogram 
+hist(steps_per_day$steps, main = "Histogram of the total number of steps taken each day", col = "green", xlab = "Steps per day")
+```
+
+### calculate the mean and median number of steps taken each day
+```{r}
+# calculate the mean
+mean(steps_per_day$steps)
+```
+
+```{r}
+# calculate the median
+median(steps_per_day$steps)
+```
+### Time series plot of the avarage number of the steps taken
+1. Make a time series plot (i.e. type = “l”) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+```{r}
+
+# calculate average steps per interval for all days
+
+avg_steps_per_interval <- aggregate(steps ~ interval, good_act, mean)
+
+# plot the time series
+plot(avg_steps_per_interval$interval, avg_steps_per_interval$steps, type='l', col=3, main="The average number of steps taken by interval", xlab=" Time intervals", ylab="Average number of steps")
+```
+
+### The 5 mintue interval that, on average, contains the max number of days 
+```{r}
+max_interval<- which.max(avg_steps_per_interval$steps)
+avg_steps_per_interval[max_interval,]$interval
+```
+### Code to describe and show a strategy for imputing missing data
+1.Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+
+2.Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+3.Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+
+```{r}
+# Calculate the missing values
+bad_act  <-activity[!complete.cases(activity),]
+nrow(bad_act)
+```
+
+
+```{r}
+# Loop through all the rows and find which step has NA in that row.Then identify the avg steps for that interval in avg_steps_per_interval and substitute the NA value with that value 
+
+for (i in 1:nrow(activity)) {
+    if(is.na(activity$steps[i])) {
+        val <- avg_steps_per_interval$steps[which(avg_steps_per_interval$interval == activity$interval[i])]
+        activity$steps[i] <- val 
+    }
+}
+```
+### Histogram of the total number of steps taken each day after values are imputed
+
+```{r}
+# The steps per day with the imputed values
+steps_per_day_impute <- aggregate(steps ~ date, activity, sum)
+# Create a histogram 
+hist(steps_per_day_impute$steps, main = "Histogram of total number of steps per day (IMPUTED)", xlab = "Steps per day", col="green")
+```
+
+```{r}
+# Calculate the mean 
+mean(steps_per_day_impute$steps)
+```
+```{r}
+# calculate the median
+median(steps_per_day_impute$steps)
+```
+### Panel plot comparing the average number of steps taken per 5 mintue interval across weekdays and weekends
+
+```{r}
+ week <- (activity$date)
+ week <-weekdays(as.Date(week))
+ class(week)
+ week <- as.factor(week)
+ table(week)
+ act <- as.Date(week, "%Y,%m,%d")
+ 
+ 
+
+```
